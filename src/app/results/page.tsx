@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { sessions } from "@/lib/sessions";
 import { useCounts } from "@/components/use-counts";
+import { cn } from "@/lib/utils";
 
 export default function ResultsPage() {
   const counts = useCounts(2000);
@@ -46,6 +47,25 @@ export default function ResultsPage() {
         </div>
       </div>
 
+      <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white/60 px-4 py-3">
+        <p className="text-sm text-stone-600">
+          {confirming
+            ? "This clears every vote. Tap again to confirm."
+            : "Testing done? Clear all votes before the meeting starts."}
+        </p>
+        <button
+          onClick={reset}
+          className={cn(
+            "shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition",
+            confirming
+              ? "border border-red-700 bg-red-700 text-white"
+              : "border border-red-300 text-red-700 hover:bg-red-50",
+          )}
+        >
+          {confirming ? "Yes, reset to 0" : "Reset votes"}
+        </button>
+      </div>
+
       <ol className="mt-10 flex flex-col gap-4">
         {ranked.map((s, i) => {
           const n = counts?.[s.id] ?? 0;
@@ -82,14 +102,6 @@ export default function ResultsPage() {
         })}
       </ol>
 
-      <div className="mt-10 flex justify-end">
-        <button
-          onClick={reset}
-          className="rounded-full border border-stone-300 px-4 py-2 text-sm text-stone-600 hover:border-red-400 hover:text-red-700"
-        >
-          {confirming ? "Tap again to clear all votes" : "Reset counts"}
-        </button>
-      </div>
     </main>
   );
 }
