@@ -11,7 +11,10 @@ function ensureTable() {
       session_id text not null,
       updated_at timestamptz not null default now()
     )
-  `;
+  `.catch((error) => {
+    ready = null;
+    throw error;
+  });
   return ready;
 }
 
