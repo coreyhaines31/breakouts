@@ -50,41 +50,41 @@ export default function ResultsPage() {
             />
             {stale ? "Reconnecting… numbers may be behind" : "Live"}
           </p>
-          <h1 className="mt-1 text-[26px] font-semibold leading-tight tracking-tight sm:text-[34px]">
+          <h1 className="mt-1 text-[28px] font-bold leading-tight tracking-[-0.022em] sm:text-[34px]">
             Breakout headcount
           </h1>
         </div>
         <div className="text-right">
-          <p className="text-[30px] font-semibold tabular-nums leading-none sm:text-[34px]">
+          <p className="text-[30px] font-bold tabular-nums leading-none tracking-[-0.02em] sm:text-[34px]">
             {counts ? total : "–"}
           </p>
           <p className="mt-1 text-[13px] text-muted">responses</p>
         </div>
       </div>
 
-      <ol className="mt-8 overflow-hidden rounded-2xl bg-white">
-        {ranked.map((s, i) => {
+      <ol className="mt-7 flex flex-col gap-3">
+        {ranked.map((s) => {
           const n = counts?.[s.id] ?? 0;
           const pct = total ? Math.round((n / total) * 100) : 0;
           const isTop = top > 0 && n === top;
           return (
             <li
               key={s.id}
-              className={cn("p-5", i > 0 && "border-t border-hairline/70")}
+              className="glass rounded-[28px] p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="text-[17px] font-semibold leading-snug">
+                  <h2 className="text-[17px] font-semibold leading-snug tracking-[-0.01em]">
                     {s.title}
                   </h2>
                   <p className="mt-0.5 text-[15px] text-muted">
-                    {s.leader}
+                    <span className="font-medium text-accent">{s.leader}</span>
                     {isTop &&
                       (tiedForTop > 1 ? " · Tied for biggest" : " · Biggest room")}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[28px] font-semibold tabular-nums leading-none">
+                  <p className="text-[32px] font-bold tabular-nums leading-none tracking-[-0.02em]">
                     {n}
                   </p>
                   <p className="mt-1 text-[13px] text-muted tabular-nums">
@@ -92,9 +92,9 @@ export default function ResultsPage() {
                   </p>
                 </div>
               </div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-background">
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/[0.06]">
                 <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-700"
+                  className="btn-primary h-full rounded-full transition-[width] duration-700"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -103,7 +103,7 @@ export default function ResultsPage() {
         })}
       </ol>
 
-      <div className="mt-8 flex items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4">
+      <div className="glass mt-6 flex items-center justify-between gap-4 rounded-[22px] py-3 pr-3 pl-5">
         <p className="text-[15px] text-muted">
           {resetFailed
             ? "Reset didn't go through. Try again."
@@ -115,7 +115,7 @@ export default function ResultsPage() {
           onClick={reset}
           className={cn(
             "shrink-0 rounded-full px-4 py-2 text-[15px] font-medium transition",
-            confirming ? "bg-red-600 text-white" : "bg-background text-red-600",
+            confirming ? "bg-red-600 text-white" : "bg-red-500/10 text-red-600",
           )}
         >
           {confirming ? "Confirm Reset" : "Reset"}
