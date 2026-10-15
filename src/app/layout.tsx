@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Ambient } from "@/components/ambient";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,13 +8,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f5f5f7",
+  themeColor: "#eef1f7",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="relative isolate min-h-full flex flex-col overflow-x-hidden">
+        <Ambient />
+        {children}
+      </body>
     </html>
   );
 }
