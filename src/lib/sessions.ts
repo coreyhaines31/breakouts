@@ -3,7 +3,6 @@ export type Session = {
   title: string;
   leader: string;
   description: string;
-  color: string;
 };
 
 export const sessions: Session[] = [
@@ -13,7 +12,6 @@ export const sessions: Session[] = [
     leader: "Cameron Stewart",
     description:
       "Understanding your personality, strengths, and whether you're more of a visionary or integrator.",
-    color: "#c2410c",
   },
   {
     id: "team",
@@ -21,7 +19,6 @@ export const sessions: Session[] = [
     leader: "Gabe Matthews",
     description:
       "Finding, developing, compensating, and retaining key employees for long-term growth.",
-    color: "#1d4ed8",
   },
   {
     id: "delegation",
@@ -29,7 +26,6 @@ export const sessions: Session[] = [
     leader: "Paul Tarpy",
     description:
       "Delegation, letting go, avoiding micromanagement, and focusing your time on the areas where you create the most value.",
-    color: "#15803d",
   },
 ];
 

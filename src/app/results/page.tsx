@@ -6,13 +6,16 @@ import { useCounts } from "@/components/use-counts";
 import { cn } from "@/lib/utils";
 
 export default function ResultsPage() {
-  const counts = useCounts(2000);
+  const { counts, stale, refresh } = useCounts(2000);
   const [confirming, setConfirming] = useState(false);
+  const [resetFailed, setResetFailed] = useState(false);
 
   const total = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
   const ranked = [...sessions].sort(
     (a, b) => (counts?.[b.id] ?? 0) - (counts?.[a.id] ?? 0),
   );
+  const top = counts?.[ranked[0].id] ?? 0;
+  const tiedForTop = ranked.filter((s) => (counts?.[s.id] ?? 0) === top).length;
 
   const reset = async () => {
     if (!confirming) {
@@ -20,81 +23,79 @@ export default function ResultsPage() {
       setTimeout(() => setConfirming(false), 4000);
       return;
     }
-    await fetch("/api/reset", { method: "POST" });
     setConfirming(false);
+    const res = await fetch("/api/reset", { method: "POST" }).catch(() => null);
+    if (!res?.ok) setResetFailed(true);
+    else {
+      setResetFailed(false);
+      refresh();
+    }
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-stone-500">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-green-600" />
-            </span>
-            Live results
+          <p
+            className={cn(
+              "flex items-center gap-2 text-[13px] font-medium",
+              stale ? "text-amber-600" : "text-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "inline-flex size-2 rounded-full",
+                stale ? "bg-amber-500" : "bg-green-500",
+              )}
+            />
+            {stale ? "Reconnecting… numbers may be behind" : "Live"}
           </p>
-          <h1 className="mt-2 font-serif text-4xl font-semibold">
+          <h1 className="mt-1 text-[26px] font-semibold leading-tight tracking-tight sm:text-[34px]">
             Breakout headcount
           </h1>
         </div>
         <div className="text-right">
-          <p className="font-serif text-5xl font-semibold tabular-nums">
+          <p className="text-[30px] font-semibold tabular-nums leading-none sm:text-[34px]">
             {counts ? total : "–"}
           </p>
-          <p className="text-sm text-stone-500">total responses</p>
+          <p className="mt-1 text-[13px] text-muted">responses</p>
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white/60 px-4 py-3">
-        <p className="text-sm text-stone-600">
-          {confirming
-            ? "This clears every vote. Tap again to confirm."
-            : "Testing done? Clear all votes before the meeting starts."}
-        </p>
-        <button
-          onClick={reset}
-          className={cn(
-            "shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition",
-            confirming
-              ? "border border-red-700 bg-red-700 text-white"
-              : "border border-red-300 text-red-700 hover:bg-red-50",
-          )}
-        >
-          {confirming ? "Yes, reset to 0" : "Reset votes"}
-        </button>
-      </div>
-
-      <ol className="mt-10 flex flex-col gap-4">
+      <ol className="mt-8 overflow-hidden rounded-2xl bg-white">
         {ranked.map((s, i) => {
           const n = counts?.[s.id] ?? 0;
           const pct = total ? Math.round((n / total) * 100) : 0;
+          const isTop = top > 0 && n === top;
           return (
-            <li key={s.id} className="rounded-2xl bg-white p-5 shadow-sm">
+            <li
+              key={s.id}
+              className={cn("p-5", i > 0 && "border-t border-hairline/70")}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-stone-400">
-                    #{i + 1} {i === 0 && total > 0 && "· biggest room"}
-                  </p>
-                  <h2 className="mt-1 font-serif text-xl font-semibold leading-snug">
+                  <h2 className="text-[17px] font-semibold leading-snug">
                     {s.title}
                   </h2>
-                  <p className="text-sm" style={{ color: s.color }}>
+                  <p className="mt-0.5 text-[15px] text-muted">
                     {s.leader}
+                    {isTop &&
+                      (tiedForTop > 1 ? " · Tied for biggest" : " · Biggest room")}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="font-serif text-4xl font-semibold tabular-nums">
+                  <p className="text-[28px] font-semibold tabular-nums leading-none">
                     {n}
                   </p>
-                  <p className="text-sm text-stone-500 tabular-nums">{pct}%</p>
+                  <p className="mt-1 text-[13px] text-muted tabular-nums">
+                    {pct}%
+                  </p>
                 </div>
               </div>
-              <div className="mt-4 h-3 overflow-hidden rounded-full bg-stone-100">
+              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-background">
                 <div
-                  className="h-full rounded-full transition-[width] duration-700"
-                  style={{ width: `${pct}%`, background: s.color }}
+                  className="h-full rounded-full bg-accent transition-[width] duration-700"
+                  style={{ width: `${pct}%` }}
                 />
               </div>
             </li>
@@ -102,6 +103,24 @@ export default function ResultsPage() {
         })}
       </ol>
 
+      <div className="mt-8 flex items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4">
+        <p className="text-[15px] text-muted">
+          {resetFailed
+            ? "Reset didn't go through. Try again."
+            : confirming
+              ? "This clears every vote."
+              : "Clear test votes before the meeting."}
+        </p>
+        <button
+          onClick={reset}
+          className={cn(
+            "shrink-0 rounded-full px-4 py-2 text-[15px] font-medium transition",
+            confirming ? "bg-red-600 text-white" : "bg-background text-red-600",
+          )}
+        >
+          {confirming ? "Confirm Reset" : "Reset"}
+        </button>
+      </div>
     </main>
   );
 }
