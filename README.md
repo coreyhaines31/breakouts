@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Breakouts
 
-## Getting Started
+A tiny app for letting a room pick breakout sessions by QR code, with a live headcount so you can assign rooms by turnout.
 
-First, run the development server:
+- **`/slide`** — full-screen slide for the projector: QR code, session list, running response count.
+- **`/`** — where the QR code goes. People select a session and confirm. One vote per device; picking again moves the vote instead of adding one.
+- **`/results`** — live counts (refreshes every 2s), ranked biggest to smallest, with a two-tap reset for clearing test votes.
+
+Built with Next.js, Tailwind CSS, and Neon Postgres.
+
+## Run it
 
 ```bash
+npm install
+echo 'DATABASE_URL=postgres://…' > .env.local   # any Postgres; Neon free tier works
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The `votes` table is created automatically on first request.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Make it yours
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit the sessions in [`src/lib/sessions.ts`](src/lib/sessions.ts). The `id` is what gets stored, so change ids before collecting votes, not during.
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
+Deploy to Vercel and connect a Neon database (Vercel Marketplace sets `DATABASE_URL` for you). If your team has Deployment Protection on, turn it off for this project, or phones will hit a Vercel login page instead of the vote page.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The QR code points at whatever URL the slide is opened on, so open `/slide` from your public domain.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- `/results` and its reset button aren't linked from the vote page, but they aren't password-protected either. Fine for a one-night event; add auth if you need it.
+- Votes are tied to a cookie, so someone switching browsers or using a private window could vote twice.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
